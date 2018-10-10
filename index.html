@@ -2,7 +2,6 @@
 <html>
 
 <head>
-
     <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css">
     <script src="jquery/dist/jquery.slim.min.js"></script>
     <script src="popper.js/dist/umd/popper.min.js"></script>
@@ -12,53 +11,75 @@
     <link rel="stylesheet" href="izitoast/dist/css/iziToast.min.css">
     <script type="text/javascript" src="izitoast/dist/js/iziToast.min.js"></script>
     <script src="angular-clipboard/angular-clipboard.js"></script>
-
 </head>
 <script>
     var app = angular.module('wa', ['ui.mask', 'angular-clipboard']);
+
     app.controller('mainController', function ($scope, $http, clipboard) {
 
+        var servidor = 'http://10.1.1.250:4444/';
+
         $scope.criarLink = function () {
-
             if ($scope.telefone != undefined && $scope.mensagem != undefined) {
-
-                var url = encodeURIComponent('https://api.whatsapp.com/send?phone=55' + $scope.telefone + '&text=' + $scope.mensagem);
-                var bitly = 'https://api-ssl.bitly.com/v3/shorten?access_token=c658048c9e402e5ef526531f452ce24da07ffd92&longUrl=';
-                var urlEncurtada = '';
 
                 $http({
                     method: 'GET',
-                    url: bitly + url
+                    url: servidor + 'validartelefone?telefone=' + $scope.telefone
                 }).then(function successCallback(response) {
-                    urlEncurtada = response.data.data.url;
-                    iziToast.show({
-                        theme: 'dark',
-                        icon: 'icon-person',
-                        title: 'Link Gerado:',
-                        message: urlEncurtada,
-                        overlay: true,
-                        position: 'center',
-                        progressBarColor: 'rgb(0, 255, 184)',
-                        buttons: [
-                            ['<button>Copiar</button>', function (instance, toast) {
-                                clipboard.copyText(urlEncurtada);
-                                iziToast.success({
-                                    title: 'OK',
-                                    message: 'Link copiado',
-                                    position: 'topRight'
+                    console.log(response.data);
+                    if (response.data == true) {
+                        var mensagemFormatada = $scope.mensagem.replace(/%/g, "%25");
+                        var url = encodeURIComponent('https://api.whatsapp.com/send?phone=55' + $scope.telefone + '&text=' + mensagemFormatada);
+                        var bitly = 'https://api-ssl.bitly.com/v3/shorten?access_token=c658048c9e402e5ef526531f452ce24da07ffd92&longUrl=';
+                        var urlEncurtada = '';
+
+                        $http({
+                            method: 'GET',
+                            url: bitly + url
+                        }).then(function successCallback(response) {
+                            urlEncurtada = response.data.data.url;
+                            $http({
+                                method: 'GET',
+                                url: servidor + 'salvarurl?url=' + urlEncurtada + '&matricula=' + $scope.matricula
+                            }).then(function successCallback(response) {
+                                iziToast.show({
+                                    theme: 'dark',
+                                    icon: 'icon-person',
+                                    title: 'Link Gerado:',
+                                    message: urlEncurtada,
+                                    overlay: true,
+                                    position: 'center',
+                                    progressBarColor: 'rgb(0, 255, 184)',
+                                    buttons: [
+                                        ['<button>Copiar</button>', function (instance, toast) {
+                                            clipboard.copyText(urlEncurtada);
+                                            iziToast.success({
+                                                title: 'OK',
+                                                message: 'Link copiado',
+                                                position: 'topRight'
+                                            });
+                                            iziToast.hide({
+                                                transitionOut: 'fadeOutUp'
+                                            }, toast);
+                                        }, true],
+                                    ],
+                                    onOpening: function (instance, toast) {
+                                    },
+                                    onClosing: function (instance, toast, closedBy) {
+                                    }
                                 });
-                                iziToast.hide({
-                                    transitionOut: 'fadeOutUp'
-                                }, toast);
-                            }, true],
-                        ],
-                        onOpening: function (instance, toast) {
-                        },
-                        onClosing: function (instance, toast, closedBy) {
-                        }
-                    });
-                }, function errorCallback(response) {
-                });
+                            },
+                            function successCallback(response) {console.error(response)});
+                        }, function errorCallback(response) {console.error(response)});
+                    }
+                    else {
+                        iziToast.error({
+                            title: 'Atenção',
+                            message: 'Apenas telefone corporativos são permitidos',
+                            position: 'center'
+                        });
+                    }
+                }, function errorCallback(response) {console.error(response)});
             }
         }
     });
@@ -100,6 +121,12 @@
                     <div class="col-md">
                         <br>
                         <form role="form">
+                            <div class="form-group">
+                                <label for="exampleInputMatricula">
+                                    Matrícula
+                                </label>
+                                <input type="text" ng-model="matricula" class="form-control" id="exampleInputMatricula" />
+                            </div>
                             <div class="form-group">
                                 <label for="exampleInputNumber">
                                     Seu número
