@@ -10,6 +10,7 @@ var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {
 
 app.use(express.static('bower_components'));
 app.use(express.static('node_modules'));
+app.use(express.static('js'));
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(compression());
 app.use(logger('combined', { stream: accessLogStream }));
@@ -54,7 +55,6 @@ app.get('/salvarurl', function (req, res) {
         }
     })
 });
-
 
 app.get('/', function (req, res) {
     res.sendFile(path.join(__dirname + '/index.html'));
