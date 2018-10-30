@@ -2,7 +2,7 @@ var app = angular.module('wa', ['ui.mask', 'angular-clipboard']);
 
     app.controller('mainController', function ($scope, $http, clipboard) {
 
-        var servidor = 'http://whatsapp.lojasmm.com.br';
+        var servidor = 'http://whatsapp.lojasmm.com.br/';
 
         $scope.criarLink = function () {
             if ($scope.telefone != undefined && $scope.mensagem != undefined) {
