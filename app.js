@@ -8,9 +8,9 @@ const helmet = require('helmet');
 var compression = require('compression');
 var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
 
-app.use(express.static('bower_components'));
-app.use(express.static('node_modules'));
-app.use(express.static('js'));
+app.use(express.static(__dirname + 'bower_components'));
+app.use(express.static(__dirname + 'node_modules'));
+app.use(express.static(__dirname + 'js'));
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(compression());
 app.use(logger('combined', { stream: accessLogStream }));
